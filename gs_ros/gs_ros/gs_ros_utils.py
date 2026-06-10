@@ -1,5 +1,6 @@
 import genesis as gs
 import numpy as np
+import inspect
 from builtin_interfaces.msg import Time
 
 from rclpy.qos import (
@@ -140,7 +141,7 @@ def gs_quat_to_ros_quat(input_quat):
 def make_gs_scene(scene_config):
     """Initialize a Genesis Scene object using parameters from a configuration dictionary."""
     sim_config = scene_config["sim"]
-    scene = gs.Scene(
+    scene_options = dict(
         sim_options=gs.options.SimOptions(
             dt=sim_config.get("dt", 1e-2),
             substeps=sim_config.get("substeps", 1),
@@ -171,6 +172,14 @@ def make_gs_scene(scene_config):
         ),
         renderer=make_renderer_options(scene_config.get("renderer_config", None)),
         show_viewer=scene_config.get("show_Viewer", None),
+    )
+    scene_signature = inspect.signature(gs.Scene)
+    scene = gs.Scene(
+        **{
+            key: value
+            for key, value in scene_options.items()
+            if key in scene_signature.parameters
+        }
     )
     return scene
 
@@ -352,7 +361,7 @@ def make_sf_options(sf_config):
 def make_viewer_options(viewer_config):
     if viewer_config is None:
         return None
-    viewer_options = gs.options.ViewerOptions(
+    options = dict(
         res=viewer_config.get("res", None),
         run_in_thread=viewer_config.get("run_in_thread", None),
         refresh_rate=viewer_config.get("refresh_rate", 60),
@@ -361,7 +370,21 @@ def make_viewer_options(viewer_config):
         camera_lookat=viewer_config.get("camera_lookat", (0.0, 0.0, 0.5)),
         camera_up=viewer_config.get("camera_up", (0.0, 0.0, 1.0)),
         camera_fov=viewer_config.get("camera_fov", 40),
-        enable_interaction=viewer_config.get("enable_interaction", False),
+    )
+    if hasattr(gs.options.ViewerOptions, "model_fields"):
+        valid_fields = set(gs.options.ViewerOptions.model_fields.keys())
+    else:
+        valid_fields = set(options.keys()) | {"enable_interaction"}
+    if "enable_interaction" in valid_fields:
+        options["enable_interaction"] = viewer_config.get("enable_interaction", False)
+    else:
+        options["enable_default_keybinds"] = viewer_config.get(
+            "enable_default_keybinds",
+            viewer_config.get("enable_interaction", False),
+        )
+        options["enable_gui"] = viewer_config.get("enable_gui", False)
+    viewer_options = gs.options.ViewerOptions(
+        **{key: value for key, value in options.items() if key in valid_fields}
     )
     return viewer_options
 
