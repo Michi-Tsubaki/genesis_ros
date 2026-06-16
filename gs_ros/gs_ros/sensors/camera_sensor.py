@@ -170,8 +170,15 @@ class CameraSensor(BaseSensor):
         )
 
         camera_types = self.sensor_config.get("camera_types", ["rgb"])
+        configured_topic = self.ros_options.get("topic")
         for cam_id, camera_type in enumerate(camera_types):
-            cam_topic = f"{self.namespace}/{camera_type}"
+            if configured_topic:
+                if len(camera_types) == 1:
+                    cam_topic = configured_topic
+                else:
+                    cam_topic = f"{configured_topic.rstrip('/')}/{camera_type}"
+            else:
+                cam_topic = f"{self.namespace}/{camera_type}"
             pub = self.node.create_publisher(Image, cam_topic, qos_profile)
             self.sensor_publishers.append(pub)
 
