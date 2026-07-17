@@ -791,28 +791,34 @@ def make_material(material_config):
 def make_surface(surface_config):
     if surface_config is None:
         return None
-    surface = gs.surfaces.Default(
-        color=surface_config.get("color", None),
-        opacity=surface_config.get("opacity", None),
-        roughness=surface_config.get("roughness", None),
-        metallic=surface_config.get("metallic", None),
-        emissive=surface_config.get("emissive", None),
-        ior=surface_config.get("ior", None),
-        opacity_texture=surface_config.get("opacity_texture", None),
-        roughness_texture=surface_config.get("roughness_texture", None),
-        metallic_texture=surface_config.get("metallic_texture", None),
-        normal_texture=surface_config.get("normal_texture", None),
-        emissive_texture=surface_config.get("emissive_texture", None),
-        default_roughness=surface_config.get("default_roughness", 1.0),
-        vis_mode=surface_config.get("vis_mode", None),
-        smooth=surface_config.get("smooth", True),
-        double_sided=surface_config.get("double_sided", None),
-        normal_diff_clamp=surface_config.get("normal_diff_clamp", 180),
-        recon_backend=surface_config.get("recon_backend", "splashsurf"),
-        generate_foam=surface_config.get("generate_foam", False),
-        foam_options=surface_config.get("foam_options", None),
-        diffuse_texture=surface_config.get("diffuse_texture", None),
-        specular_trans=surface_config.get("specular_trans", 0.0),
-        diffuse_trans=surface_config.get("diffuse_trans", 0.0),
-    )
+    surface_defaults = {
+        "color": None,
+        "opacity": None,
+        "roughness": None,
+        "metallic": None,
+        "emissive": None,
+        "ior": None,
+        "opacity_texture": None,
+        "roughness_texture": None,
+        "metallic_texture": None,
+        "normal_texture": None,
+        "emissive_texture": None,
+        "default_roughness": 1.0,
+        "vis_mode": None,
+        "smooth": True,
+        "double_sided": None,
+        "normal_diff_clamp": 180,
+        "recon_backend": "splashsurf",
+        "generate_foam": False,
+        "foam_options": None,
+        "diffuse_texture": None,
+        "specular_trans": 0.0,
+        "diffuse_trans": 0.0,
+    }
+    surface_kwargs = {
+        key: surface_config.get(key, default)
+        for key, default in surface_defaults.items()
+        if surface_config.get(key, default) is not None
+    }
+    surface = gs.surfaces.Default(**surface_kwargs)
     return surface
