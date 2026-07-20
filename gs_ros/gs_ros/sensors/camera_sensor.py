@@ -42,6 +42,7 @@ class CameraSensor(BaseSensor):
         add_noise = self.sensor_config.get("add_noise", False)
         noise_mean = self.sensor_config.get("noise_mean", 0.0)
         noise_std = self.sensor_config.get("noise_std", 0.0)
+        force_render = self.sensor_config.get("force_render", True)
 
         def timer_callback(image_publishers, camera_types, link, T, add_noise):
             if self.scene.is_built:
@@ -54,7 +55,7 @@ class CameraSensor(BaseSensor):
                 ):
                     msg = Image()
                     if render_type_str == "rgb":
-                        rendered_image = cam.render(rgb=True)
+                        rendered_image = cam.render(rgb=True, force_render=force_render)
                         rendered_image_idx = 0
                         if add_noise:
                             rendered_image = add_sensor_noise(
@@ -71,7 +72,9 @@ class CameraSensor(BaseSensor):
                         )
                         image_publisher.publish(msg)
                     elif render_type_str == "depth":
-                        rendered_image = cam.render(rgb=False, depth=True)
+                        rendered_image = cam.render(
+                            rgb=False, depth=True, force_render=force_render
+                        )
                         rendered_image_idx = 1
                         if add_noise:
                             rendered_image = add_sensor_noise(
@@ -90,7 +93,9 @@ class CameraSensor(BaseSensor):
                         )
                         image_publisher.publish(msg)
                     elif render_type_str == "segmentation":
-                        rendered_image = cam.render(rgb=False, segmentation=True)
+                        rendered_image = cam.render(
+                            rgb=False, segmentation=True, force_render=force_render
+                        )
                         rendered_image_idx = 2
                         if add_noise:
                             rendered_image = add_sensor_noise(
@@ -111,7 +116,9 @@ class CameraSensor(BaseSensor):
                         )
                         image_publisher.publish(msg)
                     elif render_type_str == "normal":
-                        rendered_image = cam.render(rgb=False, normal=True)
+                        rendered_image = cam.render(
+                            rgb=False, normal=True, force_render=force_render
+                        )
                         rendered_image_idx = 3
                         if add_noise:
                             rendered_image = add_sensor_noise(
