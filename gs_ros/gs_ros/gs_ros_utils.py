@@ -791,34 +791,35 @@ def make_material(material_config):
 def make_surface(surface_config):
     if surface_config is None:
         return None
-    surface_kwargs = {
-        "color": surface_config.get("color", None),
-        "opacity": surface_config.get("opacity", None),
-        "roughness": surface_config.get("roughness", None),
-        "metallic": surface_config.get("metallic", None),
-        "emissive": surface_config.get("emissive", None),
-        "ior": surface_config.get("ior", None),
-        "opacity_texture": surface_config.get("opacity_texture", None),
-        "roughness_texture": surface_config.get("roughness_texture", None),
-        "metallic_texture": surface_config.get("metallic_texture", None),
-        "normal_texture": surface_config.get("normal_texture", None),
-        "emissive_texture": surface_config.get("emissive_texture", None),
-        "default_roughness": surface_config.get("default_roughness", 1.0),
-        "vis_mode": surface_config.get("vis_mode", None),
-        "smooth": surface_config.get("smooth", True),
-        "double_sided": surface_config.get("double_sided", None),
-        "normal_diff_clamp": surface_config.get("normal_diff_clamp", 180),
-        "recon_backend": surface_config.get("recon_backend", "splashsurf"),
-        "generate_foam": surface_config.get("generate_foam", False),
-        "diffuse_texture": surface_config.get("diffuse_texture", None),
-        "specular_trans": surface_config.get("specular_trans", 0.0),
-        "diffuse_trans": surface_config.get("diffuse_trans", 0.0),
-    }
-    foam_options = surface_config.get("foam_options", None)
+    surface_kwargs = dict(
+        color=surface_config.get("color", None),
+        opacity=surface_config.get("opacity", None),
+        roughness=surface_config.get("roughness", None),
+        metallic=surface_config.get("metallic", None),
+        emissive=surface_config.get("emissive", None),
+        ior=surface_config.get("ior", None),
+        opacity_texture=surface_config.get("opacity_texture", None),
+        roughness_texture=surface_config.get("roughness_texture", None),
+        metallic_texture=surface_config.get("metallic_texture", None),
+        normal_texture=surface_config.get("normal_texture", None),
+        emissive_texture=surface_config.get("emissive_texture", None),
+        default_roughness=surface_config.get("default_roughness", 1.0),
+        vis_mode=surface_config.get("vis_mode", None),
+        smooth=surface_config.get("smooth", True),
+        double_sided=surface_config.get("double_sided", None),
+        normal_diff_clamp=surface_config.get("normal_diff_clamp", 180),
+        recon_backend=surface_config.get("recon_backend", "splashsurf"),
+        generate_foam=surface_config.get("generate_foam", False),
+        diffuse_texture=surface_config.get("diffuse_texture", None),
+        specular_trans=surface_config.get("specular_trans", 0.0),
+        diffuse_trans=surface_config.get("diffuse_trans", 0.0),
+    )
+
+    # Genesis 1.1.0 changed foam_options to a non-nullable FoamOptions field
+    # with a default factory.  Passing the legacy YAML default (null) now fails
+    # validation, so leave the argument unset unless the user configured it.
+    foam_options = surface_config.get("foam_options")
     if foam_options is not None:
         surface_kwargs["foam_options"] = foam_options
 
-    surface = gs.surfaces.Default(
-        **surface_kwargs,
-    )
-    return surface
+    return gs.surfaces.Default(**surface_kwargs)
